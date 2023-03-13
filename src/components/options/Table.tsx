@@ -36,10 +36,10 @@ function Table() {
       header: "Value",
       cell: (info) => info.getValue()?.at(0)?.value,
     }),
-    columnHelper.accessor("rule.action.requestHeaders", {
+    columnHelper.accessor("description", {
       id: "description",
       header: "Description",
-      cell: (info) => info.getValue()?.at(0)?.value,
+      cell: (info) => info.getValue(),
     }),
     columnHelper.accessor("rule", {
       id: "options",
