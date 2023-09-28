@@ -1,17 +1,18 @@
-import { Message, MessageTypes } from "../../router";
-import { StorageItem } from "../../rules";
+import { IItem, Message, MessageTypes } from "../../api/interfaces";
 
 import { Rules } from "./signals";
 
 export async function getRulesStack(): Promise<void> {
   try {
-    let response = await chrome.runtime.sendMessage<Message, StorageItem[]>({
+    let response = await chrome.runtime.sendMessage<Message, IItem[]>({
       type: MessageTypes.LIST,
     });
-    Rules.value = response;
+
+    if (response !== undefined) {
+      Rules.value = response;
+    }
   } catch (e) {
-    console.log("error");
-    console.log(e);
+    console.log("Error: ", e);
   }
 }
 

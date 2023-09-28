@@ -15,7 +15,9 @@
     "isolatedModules": false,
     "noEmit": true,
     "jsx": "react-jsx",
-    "types": ["chrome", "vitest/importMeta"]
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+    "types": ["chrome", "vitest/importMeta", "reflect-metadata"]
   },
   "include": ["src"],
   "references": [{ "path": "./tsconfig.node.json" }]

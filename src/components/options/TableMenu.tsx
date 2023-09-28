@@ -15,7 +15,6 @@ function TableMenu() {
         title="Refresh"
         className="text-sm text-gray-400"
         onClick={async () => {
-          console.log("hello");
           await getRulesStack();
         }}
       >

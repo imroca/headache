@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useLayoutEffect } from "react";
 
 import {
   createColumnHelper,
@@ -19,29 +19,29 @@ import {
 
 import { toggleRule, removeRule, getRulesStack } from "./functions";
 
-import { StorageItem } from "../../rules";
+import { IItem } from "../../api/interfaces";
 import { Rules, Rule, OpenModal } from "./signals";
 
 function Table() {
   const [sorting, setSorting] = useState<SortingState>([]);
-  const columnHelper = createColumnHelper<StorageItem>();
+  const columnHelper = createColumnHelper<IItem>();
   const columns = [
-    columnHelper.accessor("rule.action.requestHeaders", {
+    columnHelper.accessor("header", {
       id: "header",
       header: "Name",
-      cell: (info) => info.getValue()?.at(0)?.header,
+      cell: (info) => info.getValue(),
     }),
-    columnHelper.accessor("rule.action.requestHeaders", {
+    columnHelper.accessor("value", {
       id: "value",
       header: "Value",
-      cell: (info) => info.getValue()?.at(0)?.value,
+      cell: (info) => info.getValue(),
     }),
     columnHelper.accessor("description", {
       id: "description",
       header: "Description",
       cell: (info) => info.getValue(),
     }),
-    columnHelper.accessor("rule", {
+    columnHelper.accessor("value", {
       id: "options",
       header: "Options",
       enableSorting: false,
@@ -60,7 +60,7 @@ function Table() {
             <div
               className="cursor-pointer"
               onClick={() => {
-                toggleRule(info.row.original.rule.id);
+                toggleRule(info.row.original.id);
               }}
             >
               {info.row.original.enabled ? (
@@ -76,7 +76,7 @@ function Table() {
               <XCircleIcon
                 className="h-5 w-5 text-pink-500 cursor-pointer"
                 onClick={() => {
-                  removeRule(info.row.original.rule.id);
+                  removeRule(info.row.original.id);
                 }}
               />
             </div>
@@ -85,6 +85,7 @@ function Table() {
       },
     }),
   ];
+
   const table = useReactTable({
     data: Rules.value,
     columns,
@@ -101,8 +102,13 @@ function Table() {
     getRulesStack();
   }, []);
 
+  useLayoutEffect(() => {
+    getRulesStack();
+  }, []);
+
   return (
     <table className="table-auto w-full border-gray-900 rounded shadow-md p-4">
+      <caption>Rules: {JSON.stringify(Rules.value)}</caption>
       <thead className="text-xs font-semibold uppercase text-gray-400 bg-gray-200">
         {table.getHeaderGroups().map((headerGroup) => (
           <tr key={headerGroup.id}>

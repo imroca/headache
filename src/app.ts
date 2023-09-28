@@ -1,34 +1,34 @@
 import { BoltIcon } from "@heroicons/react/24/outline";
-import { Message, MessageTypes, route } from "./router";
+import { Message, MessageTypes } from "./api/interfaces";
+import Router from "./router";
 import { Stack } from "./rules";
+import { container, inject, injectable } from "tsyringe";
 
-export namespace headache.app {
-  export function init() {
-    console.log("INIT");
-    const stack = new Stack();
-    // stack.sync();
+@injectable()
+class App {
+  constructor(
+    @inject("Stack") private stack: Stack,
+    @inject("Router") private router: Router
+  ) {}
+  init() {
     chrome.runtime.onMessage.addListener(
-      async (
-        message: Message,
-        _,
-        sendResponse
-      ): Promise<boolean | undefined> => {
+      (message: Message, _, sendResponse): boolean | undefined => {
         const handlers = {
-          [MessageTypes.GET]: stack.get,
-          [MessageTypes.LIST]: stack.list,
-          [MessageTypes.RULE]: stack.rule,
-          [MessageTypes.ENABLED]: stack.add,
-          [MessageTypes.ADD]: stack.add,
-          [MessageTypes.REMOVE]: stack.remove,
-          [MessageTypes.CLEAR]: stack.clear,
-          [MessageTypes.TOGGLE]: stack.toggle,
+          [MessageTypes.GET]: this.stack.get,
+          [MessageTypes.LIST]: this.stack.list,
+          [MessageTypes.ENABLED]: this.stack.add,
+          [MessageTypes.ADD]: this.stack.add,
+          [MessageTypes.REMOVE]: this.stack.remove,
+          [MessageTypes.CLEAR]: this.stack.clear,
+          [MessageTypes.TOGGLE]: this.stack.toggle,
+          [MessageTypes.EDIT]: this.stack.edit,
         };
 
-        console.log("message", JSON.stringify(message));
-
-        await route(message, handlers[message.type], sendResponse);
+        this.router.route(message, handlers[message.type], sendResponse);
         return true;
       }
     );
   }
 }
+
+export default App;

@@ -1,9 +1,10 @@
-import react from "@vitejs/plugin-react";
+import react from "@vitejs/plugin-react-swc";
+import TurboConsole from "vite-plugin-turbo-console";
 import { defineConfig } from "vite";
 import { resolve } from "path";
 
 export default defineConfig({
-  plugins: [react({ jsxRuntime: "classic" })],
+  plugins: [react({ tsDecorators: true }), TurboConsole()],
   build: {
     rollupOptions: {
       input: {

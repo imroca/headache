@@ -1,5 +1,5 @@
 import { useForm, SubmitHandler } from "react-hook-form";
-import { Message, MessageTypes } from "../../router";
+import { Message, MessageTypes } from "../../api/interfaces";
 
 interface FormInput {
   header: String;
@@ -8,6 +8,7 @@ interface FormInput {
 }
 
 import { getRulesStack } from "./functions";
+import { tr } from "date-fns/locale";
 
 function Form() {
   const { register, handleSubmit, reset } = useForm<FormInput>();
@@ -16,7 +17,9 @@ function Form() {
     value,
     description,
   }) => {
-    await chrome.runtime.sendMessage<Message, any>({
+    console.log("onSubmit", true);
+
+    const response = await chrome.runtime.sendMessage<Message, any>({
       type: MessageTypes.ADD,
       body: {
         header,
@@ -25,6 +28,7 @@ function Form() {
         description,
       },
     });
+    console.log("response", response);
     await getRulesStack();
     await reset();
   };
