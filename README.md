@@ -4,7 +4,13 @@ Headache is yet another extension for chrome that lets you add headers to your o
 
 ## Installation
 
-TBD.
+Follow to load to a chromium based browser.
+
+1. Click Extensions.
+2. Manage Extension.
+3. Developer mode on.
+4. Load unpacked.
+5. Browse to the projects dist folder and select.
 
 ## Usage
 
