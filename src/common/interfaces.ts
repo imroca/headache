@@ -1,3 +1,5 @@
+import { R } from "vitest/dist/reporters-5f784f42";
+
 export type Operation = chrome.declarativeNetRequest.HeaderOperation;
 export type LocalStorage = chrome.storage.LocalStorageArea;
 export type Rule = chrome.declarativeNetRequest.Rule;
@@ -14,9 +16,14 @@ export interface IItem {
   rule?: Rule;
 }
 
+export interface Rules {
+  available: Rule[];
+  enabled: Rule[];
+}
+
 export interface IRuleSet {
   get: (id: number) => Promise<void>;
-  list: () => Promise<Rule[]>;
+  list: () => Promise<Rules>;
   add: (
     header: string,
     operation: Operation,
