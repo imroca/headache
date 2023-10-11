@@ -6,7 +6,7 @@ import { format, formatDistanceToNow } from "date-fns";
 import { Dialog } from "@headlessui/react";
 import { XMarkIcon } from "@heroicons/react/24/outline";
 
-import { Message, MessageTypes } from "../../api/interfaces";
+import { Message, MessageTypes } from "../../common/interfaces";
 import { getRulesStack } from "./functions";
 import { Rule, OpenModal } from "./signals";
 

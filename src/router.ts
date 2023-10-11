@@ -5,7 +5,7 @@ import {
   MessageTypes,
   RuleAddBody,
   RuleIdBody,
-} from "./api/interfaces";
+} from "./common/interfaces";
 
 @injectable()
 class Router {

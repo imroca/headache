@@ -1,28 +1,62 @@
-import { injectable } from "tsyringe";
+import { injectable, inject } from "tsyringe";
 
 import {
   Operation,
   IItem,
   Rule,
-  IStore,
-  ILocalStorage,
-} from "./api/interfaces";
+  IStack,
+  IRuleSet,
+  LocalStorage,
+} from "./common/interfaces";
+
 @injectable()
-export class Stack implements IStore {
-  private stack: IItem[] = [];
-  private storage: ILocalStorage;
-
-  constructor() {
-    this.storage = chrome.storage.local;
+export class ChromeStore implements IStack {
+  async get(): Promise<Rule[]> {
+    return await chrome.declarativeNetRequest.getDynamicRules();
   }
+  async update(removeRuleIds: number[], addRules: Rule[]): Promise<void> {
+    await chrome.declarativeNetRequest.updateDynamicRules({
+      removeRuleIds,
+      addRules,
+    });
+  }
+}
 
-  public get = async (id: number): Promise<IItem> => {
-    const item = (await this.storage.get([id])) as IItem;
-    return item;
-  };
+@injectable()
+export class LocalStore implements IStack {
+  constructor(@inject("Store") private store: LocalStorage) {}
 
-  public list = async (): Promise<IItem[]> => {
-    return (await this.storage.get()) as IItem[];
+  async get(): Promise<Rule[]> {
+    return await chrome.declarativeNetRequest.getDynamicRules();
+  }
+  async update(removeRuleIds: number[], addRules: Rule[]): Promise<void> {
+    await chrome.declarativeNetRequest.updateDynamicRules({
+      removeRuleIds,
+      addRules,
+    });
+  }
+}
+
+@injectable()
+export class RuleSet implements IRuleSet {
+  constructor(
+    // @inject("Store") private store: LocalStorage,
+    @inject("Stack") private stack: ChromeStore
+  ) {}
+
+  public get = async (id: number): Promise<void> => {};
+
+  public list = async (): Promise<Rule[]> => {
+    console.log("List rules");
+
+    // const storage = await this.stack.get();
+    // const entries = Object.entries(storage);
+    // const items = entries.map((rule: any) => {
+    //   return rule[1];
+    // });
+    const rules = await this.stack.get();
+    console.log("List rules:", rules);
+    return rules;
   };
 
   public add = async (
@@ -32,7 +66,25 @@ export class Stack implements IStore {
     description: string
   ): Promise<void> => {
     const id = await this.getNextId();
-    console.log(id);
+
+    let rule: Rule = {
+      action: {
+        requestHeaders: [
+          {
+            header,
+            operation,
+            value,
+          },
+        ],
+        type: chrome.declarativeNetRequest.RuleActionType.MODIFY_HEADERS,
+      },
+      condition: {
+        resourceTypes: [chrome.declarativeNetRequest.ResourceType.MAIN_FRAME],
+        urlFilter: "*",
+      },
+      id,
+    };
+
     let entry = {
       [id.toString()]: {
         id,
@@ -43,12 +95,12 @@ export class Stack implements IStore {
         enabled: true,
         createdAt: Date.now(),
         updatedAt: Date.now(),
+        rule,
       },
     };
 
-    await this.storage.set(entry);
-    // await this.sync();
-    // await this.update();
+    // await this.store.set(entry);
+    await this.stack.update([], [rule]);
   };
 
   // Todo: marks a rule as enabled or disabled.
@@ -59,36 +111,40 @@ export class Stack implements IStore {
     value: string,
     description: string
   ): Promise<void> {
-    let rule = await this.storage.get(id.toString());
-    rule.action.requestHeaders[0] = {
-      header,
-      operation,
-      value,
-    };
-    let entry = {
-      [id]: {
-        ...rule[id],
-        description,
-        updatedAt: Date.now(),
-      },
-    };
-
-    await this.storage.set(entry);
-    await this.sync();
-    await this.update();
+    // let rules = await this.stack.get();
+    // let rule = rules.find((rule) => rule.id === id) as Rule;
+    // if (!rule) {
+    //   throw new Error("Rule not found");
+    // }
+    // if (!rule.action.requestHeaders) {
+    //   throw new Error("Rule not found");
+    // }
+    // rule.action.requestHeaders[0] = {
+    //   header,
+    //   operation,
+    //   value,
+    // };
+    // let entry = {
+    //   [id]: {
+    //     ...rule[id],
+    //     description,
+    //     updatedAt: Date.now(),
+    //   },
+    // };
+    // await this.store.set(entry);
+    // await this.update();
   }
 
   public sync = async (): Promise<void> => {
-    const storage = await this.storage.get();
+    const storage = await this.stack.get();
     const entries = Object.entries(storage);
     const rules = entries.map((rule: any) => {
       return rule[1];
     });
-    this.stack = rules;
   };
 
   public async update(): Promise<void> {
-    const storage = await this.storage.get();
+    const storage = await this.stack.get();
     const entries = Object.entries(storage);
     const enabled = entries.map((entry: any) => {
       if (entry[1].enabled) {
@@ -102,35 +158,31 @@ export class Stack implements IStore {
   }
 
   public toggle = async (id: number): Promise<void> => {
-    let rule = await this.storage.get(id.toString());
-    let entry = {
-      [id]: {
-        ...rule[id],
-        description: rule[id].description,
-        enabled: !rule[id].enabled,
-        updatedAt: Date.now(),
-      },
-    };
-
-    await this.storage.set(entry);
-    await this.sync();
+    // let rule = await this.store.get(id.toString());
+    // let entry = {
+    //   [id]: {
+    //     ...rule[id],
+    //     description: rule[id].description,
+    //     enabled: !rule[id].enabled,
+    //     updatedAt: Date.now(),
+    //   },
+    // };
+    // await this.store.set(entry);
   };
 
   public remove = async (id: number): Promise<void> => {
-    // await chrome.declarativeNetRequest.updateDynamicRules({
-    //   removeRuleIds: [id],
-    // });
-    await this.storage.remove(id.toString());
-    await this.sync();
+    // await this.store.remove(id.toString());
+    await this.stack.update([id], []);
   };
 
   public clear = async () => {
-    await this.storage.clear();
-    await this.sync();
+    await this.stack.update([], []);
+    // await this.store.clear();
+    // await this.sync();
   };
 
   public async count(): Promise<number> {
-    const storage = await this.storage.get();
+    const storage = await this.stack.get();
     return Object.keys(storage).length;
   }
 
@@ -146,4 +198,5 @@ export class Stack implements IStore {
   }
 }
 
-export default Stack;
+export * from "./common/interfaces";
+export default RuleSet;

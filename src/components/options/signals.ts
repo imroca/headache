@@ -1,5 +1,5 @@
 import { signal } from "@preact/signals-react";
-import { IItem } from "../../api/interfaces";
+import { IItem } from "../../common/interfaces";
 
 type Nullable<T> = T | null;
 

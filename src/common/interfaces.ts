@@ -1,5 +1,5 @@
 export type Operation = chrome.declarativeNetRequest.HeaderOperation;
-export type ILocalStorage = chrome.storage.LocalStorageArea;
+export type LocalStorage = chrome.storage.LocalStorageArea;
 export type Rule = chrome.declarativeNetRequest.Rule;
 
 export interface IItem {
@@ -11,12 +11,12 @@ export interface IItem {
   enabled?: boolean;
   createdAt?: number;
   updatedAt?: number;
+  rule?: Rule;
 }
 
-export interface IStore {
-  get: (id: number) => Promise<IItem>;
-  sync: () => void;
-  list: () => Promise<IItem[]>;
+export interface IRuleSet {
+  get: (id: number) => Promise<void>;
+  list: () => Promise<Rule[]>;
   add: (
     header: string,
     operation: Operation,
@@ -30,7 +30,6 @@ export interface IStore {
     value: string,
     description: string
   ) => void;
-  update: () => void;
   remove: (id: number) => void;
   toggle: (id: number) => void;
   clear: () => void;
@@ -81,4 +80,9 @@ export interface SuccessResponse extends Response {
 
 export interface ErrorResponse extends Response {
   message?: any;
+}
+
+export interface IStack {
+  get: () => Promise<Rule[]>;
+  update: (removeRuleIds: number[], addRules: Rule[]) => Promise<void>;
 }

@@ -19,29 +19,29 @@ import {
 
 import { toggleRule, removeRule, getRulesStack } from "./functions";
 
-import { IItem } from "../../api/interfaces";
+import { IItem } from "../../common/interfaces";
 import { Rules, Rule, OpenModal } from "./signals";
 
 function Table() {
   const [sorting, setSorting] = useState<SortingState>([]);
   const columnHelper = createColumnHelper<IItem>();
   const columns = [
-    columnHelper.accessor("header", {
+    columnHelper.accessor("rule.action.requestHeaders", {
       id: "header",
       header: "Name",
-      cell: (info) => info.getValue(),
+      cell: (info) => info.getValue()?.at(0)?.header,
     }),
-    columnHelper.accessor("value", {
+    columnHelper.accessor("rule.action.requestHeaders", {
       id: "value",
       header: "Value",
-      cell: (info) => info.getValue(),
+      cell: (info) => info.getValue()?.at(0)?.value,
     }),
     columnHelper.accessor("description", {
       id: "description",
       header: "Description",
       cell: (info) => info.getValue(),
     }),
-    columnHelper.accessor("value", {
+    columnHelper.accessor("rule", {
       id: "options",
       header: "Options",
       enableSorting: false,
@@ -60,7 +60,7 @@ function Table() {
             <div
               className="cursor-pointer"
               onClick={() => {
-                toggleRule(info.row.original.id);
+                toggleRule(info.row.original.rule!.id);
               }}
             >
               {info.row.original.enabled ? (
@@ -76,7 +76,7 @@ function Table() {
               <XCircleIcon
                 className="h-5 w-5 text-pink-500 cursor-pointer"
                 onClick={() => {
-                  removeRule(info.row.original.id);
+                  removeRule(info.row.original.rule!.id);
                 }}
               />
             </div>
@@ -85,6 +85,8 @@ function Table() {
       },
     }),
   ];
+
+  console.log("Tables rules", Rules.value);
 
   const table = useReactTable({
     data: Rules.value,
@@ -108,7 +110,6 @@ function Table() {
 
   return (
     <table className="table-auto w-full border-gray-900 rounded shadow-md p-4">
-      <caption>Rules: {JSON.stringify(Rules.value)}</caption>
       <thead className="text-xs font-semibold uppercase text-gray-400 bg-gray-200">
         {table.getHeaderGroups().map((headerGroup) => (
           <tr key={headerGroup.id}>

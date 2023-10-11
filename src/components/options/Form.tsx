@@ -1,5 +1,5 @@
 import { useForm, SubmitHandler } from "react-hook-form";
-import { Message, MessageTypes } from "../../api/interfaces";
+import { Message, MessageTypes } from "../../common/interfaces";
 
 interface FormInput {
   header: String;

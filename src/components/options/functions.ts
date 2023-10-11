@@ -1,4 +1,4 @@
-import { IItem, Message, MessageTypes } from "../../api/interfaces";
+import { IItem, Message, MessageTypes } from "../../common/interfaces";
 
 import { Rules } from "./signals";
 

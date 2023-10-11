@@ -2,17 +2,19 @@ import "reflect-metadata";
 import { container } from "tsyringe";
 import App from "./app";
 import Router from "./router";
-import Stack from "./rules";
+import { RuleSet, ChromeStore } from "./rules";
+import LocalStorage from "./rules";
 
 function load(): void {
-  console.log("App Load");
-  container.register("App", { useClass: App });
   container.register("Router", { useClass: Router });
-  container.register("Stack", { useClass: Stack });
+  container.register("Stack", { useClass: ChromeStore });
+  container.register("Store", { useClass: LocalStorage });
+  container.register("RuleSet", { useClass: RuleSet });
+  container.register("App", { useClass: App });
 }
 
 export function Headache(): App {
-  console.log("App Init");
+  console.log("Headache");
   load();
   const app = container.resolve<App>("App");
   return app;
